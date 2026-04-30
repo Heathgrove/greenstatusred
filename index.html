@@ -46,7 +46,7 @@
             letter-spacing: 3px;
             color: #ff4040;
             margin: 0 0 10px 0;
-            text-shadow: 0 0 6px #cc0000;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #cc0000;
             line-height: 1.1;
         }
         #subtitle-1, #subtitle-2 {
@@ -218,7 +218,7 @@
             sub1.style.letterSpacing = lsEm + 'em';
             sub2.style.letterSpacing = lsEm + 'em';
 
-            const target = window.innerWidth * 0.8;
+            const target = window.innerWidth * 0.88;
             const naturalWidth = sub1.getBoundingClientRect().width;
             if (naturalWidth > 0 && target > 0) {
                 const newSize = baseSize * (target / naturalWidth);
