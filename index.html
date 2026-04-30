@@ -4,30 +4,138 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Status Page</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         body {
             background-color: black;
             color: red;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
             text-align: center;
+            margin: 0;
+            padding-top: 20px;
+        }
+        h1 {
+            font-size: 160px;
+            margin: 0 0 22px 0;
+            animation: claxon 0.5s infinite alternate ease-in-out;
+        }
+        @keyframes claxon {
+            from {
+                color: #901818;
+                text-shadow:
+                    0 0 10px #a81818,
+                    0 0 22px #600000;
+            }
+            to {
+                color: #d83030;
+                text-shadow:
+                    0 0 8px #ff3030,
+                    0 0 25px #e02020,
+                    0 0 60px #b00000,
+                    0 0 110px #800000,
+                    0 0 170px #500000;
+            }
+        }
+        .subtitle {
+            font-size: 44px;
+            letter-spacing: 3px;
+            color: #ff4040;
+            margin: 0 0 65px 0;
+            text-shadow: 0 0 6px #cc0000;
+        }
+        .row {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            gap: 20px;
+            width: 80%;
+            margin: 0 auto;
         }
-        h1 {
-            font-size: 80px;
-            text-shadow: 0 0 10px red, 0 0 20px darkred;
-            animation: glow 1.5s infinite alternate;
+        .row img {
+            height: 200px;
+            width: auto;
         }
-        @keyframes glow {
-            0% { text-shadow: 0 0 10px red, 0 0 20px darkred; }
-            100% { text-shadow: 0 0 15px red, 0 0 25px darkred; }
+        .bar-column {
+            flex: 1;
+            position: relative;
+        }
+        .progress {
+            height: 100px;
+            background-color: #e62828;
+            box-shadow: 0 0 10px #e62828, 0 0 20px #8a1010;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 50%;
+            background-color: #5dd95d;
+            box-shadow: 0 0 10px #5dd95d, 0 0 20px #2a8a2a;
+        }
+        .countdown {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            margin-bottom: 10px;
+            font-size: 72px;
+            letter-spacing: 6px;
+            color: #ff4040;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #cc0000;
+        }
+        .countdown .label {
+            display: block;
+            font-size: 28px;
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+            color: #ff6060;
+            text-shadow: 0 0 6px #cc0000;
         }
     </style>
 </head>
 <body>
-    <h1>STATUS</h1>
+    <h1>ALERT</h1>
+    <div class="subtitle">CRISIS POINT REACHED - STATUS ALERT SYSTEM ACTIVE</div>
+    <div class="row">
+        <img src="Varjan.jpg" alt="Varjan">
+        <div class="bar-column">
+            <div class="countdown">
+                <span id="countdown-value">--</span>
+            </div>
+            <div class="progress">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <img src="Kronos.jpg" alt="Kronos">
+    </div>
+    <script>
+        const fill = document.querySelector('.progress-fill');
+        const center = 50;
+        const swing = 1;
+        function wobble() {
+            const target = center + (Math.random() * 2 - 1) * swing;
+            const duration = 120 + Math.random() * 280;
+            fill.style.transition = `width ${duration}ms ease-in-out`;
+            fill.style.width = target + '%';
+            setTimeout(wobble, duration);
+        }
+        wobble();
+
+        const target = new Date('2026-05-30T14:00:00+01:00').getTime();
+        const cdEl = document.getElementById('countdown-value');
+        const pad = (n, w) => String(n).padStart(w, '0');
+        function tick() {
+            let diff = target - Date.now();
+            if (diff < 0) diff = 0;
+            const days = Math.floor(diff / 86400000);
+            const hours = Math.floor((diff % 86400000) / 3600000);
+            const minutes = Math.floor((diff % 3600000) / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            const cs = Math.floor((diff % 1000) / 10);
+            cdEl.textContent = `${days} ${pad(hours,2)}:${pad(minutes,2)}:${pad(seconds,2)}.${pad(cs,2)}`;
+            requestAnimationFrame(tick);
+        }
+        tick();
+    </script>
 </body>
 </html>
