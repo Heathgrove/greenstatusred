@@ -45,7 +45,7 @@
             font-size: 44px;
             letter-spacing: 3px;
             color: #ff4040;
-            margin: 0 0 65px 0;
+            margin: 0 0 10px 0;
             text-shadow: 0 0 6px #cc0000;
             line-height: 1.1;
         }
@@ -62,10 +62,9 @@
             gap: 0;
             width: 96%;
             margin: 0 auto;
-            position: relative;
         }
         .row img {
-            height: 100px;
+            height: 130px;
             width: auto;
         }
         .progress {
@@ -81,15 +80,13 @@
             box-shadow: 0 0 10px #5dd95d, 0 0 20px #2a8a2a;
         }
         .countdown {
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: calc(100% + 10px);
+            margin: 0 0 10px 0;
             font-size: clamp(20px, 7vw, 72px);
             letter-spacing: clamp(1.5px, 0.6vw, 6px);
             color: #ff4040;
             text-shadow: 0 0 10px #ff0000, 0 0 20px #cc0000;
             white-space: nowrap;
+            line-height: 1;
         }
         .countdown .label {
             display: block;
@@ -108,7 +105,7 @@
             .subtitle {
                 font-size: 18px;
                 letter-spacing: 1.5px;
-                margin: 0 0 32px 0;
+                margin: 0 0 6px 0;
                 padding: 0 8px;
             }
             .row {
@@ -116,19 +113,19 @@
                 gap: 0;
             }
             .row img {
-                height: 40px;
+                height: 52px;
             }
             .progress {
                 height: 40px;
             }
             .countdown {
-                bottom: calc(100% + 6px);
+                margin-bottom: 6px;
             }
         }
         @media (max-width: 420px) {
             h1 { font-size: 52px; }
-            .subtitle { font-size: 14px; letter-spacing: 1px; margin-bottom: 26px; }
-            .row img { height: 32px; }
+            .subtitle { font-size: 14px; letter-spacing: 1px; margin-bottom: 6px; }
+            .row img { height: 40px; }
             .progress { height: 32px; }
         }
     </style>
@@ -139,10 +136,10 @@
         <div><span id="subtitle-1">CRISIS POINT REACHED</span></div>
         <div><span id="subtitle-2">STATUS ALERT SYSTEM ACTIVE</span></div>
     </div>
+    <div class="countdown">
+        <span id="countdown-value">--</span>
+    </div>
     <div class="row">
-        <div class="countdown">
-            <span id="countdown-value">--</span>
-        </div>
         <img src="Varjan.png" alt="Varjan">
         <div class="progress">
             <div class="progress-fill"></div>
