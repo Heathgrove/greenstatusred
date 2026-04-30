@@ -90,6 +90,18 @@
     </form>
 
     <script>
+        try {
+            const nav = performance.getEntriesByType('navigation')[0];
+            if (nav && nav.transferSize === 0) {
+                const url = new URL(location.href);
+                url.searchParams.set('_cb', Date.now());
+                location.replace(url.toString());
+            }
+        } catch (e) {}
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) location.reload();
+        });
+
         const KVDB_URL = 'https://kvdb.io/FbDzaTikbRwrN5i2ruzK9J/progress';
         const currentEl = document.getElementById('current');
         const valueEl = document.getElementById('value');
