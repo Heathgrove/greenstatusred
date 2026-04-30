@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: black;
+            color: #ff4040;
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            text-align: center;
+            margin: 0;
+            padding: 24px 16px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 36px;
+            margin: 0 0 24px 0;
+            letter-spacing: 4px;
+            text-shadow: 0 0 8px #cc0000;
+        }
+        .current {
+            font-size: 64px;
+            letter-spacing: 4px;
+            color: #ff4040;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #cc0000;
+            margin: 0 0 24px 0;
+            line-height: 1;
+        }
+        .current .unit {
+            font-size: 32px;
+            opacity: 0.7;
+            margin-left: 4px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            max-width: 360px;
+            margin: 0 auto;
+        }
+        input[type=number] {
+            font-family: inherit;
+            font-size: 40px;
+            text-align: center;
+            background: black;
+            color: #5dd95d;
+            border: 2px solid #5dd95d;
+            box-shadow: 0 0 8px #2a8a2a;
+            padding: 8px 12px;
+            width: 200px;
+            letter-spacing: 4px;
+            outline: none;
+        }
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] { -moz-appearance: textfield; }
+        button {
+            font-family: inherit;
+            font-size: 22px;
+            letter-spacing: 3px;
+            background: black;
+            color: #ff4040;
+            border: 2px solid #e62828;
+            box-shadow: 0 0 8px #8a1010;
+            padding: 10px 20px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        button:hover, button:focus {
+            background: #200000;
+            outline: none;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .presets button {
+            font-size: 18px;
+            padding: 6px 12px;
+            letter-spacing: 2px;
+        }
+        .status {
+            margin-top: 16px;
+            font-size: 18px;
+            min-height: 24px;
+            letter-spacing: 2px;
+        }
+        .status.ok { color: #5dd95d; text-shadow: 0 0 6px #2a8a2a; }
+        .status.err { color: #ff4040; text-shadow: 0 0 6px #cc0000; }
+    </style>
+</head>
+<body>
+    <h1>STATUS CONTROL</h1>
+    <div class="current"><span id="current">--</span><span class="unit">%</span></div>
+    <form id="form">
+        <input type="number" id="value" min="0" max="100" step="0.1" required>
+        <button type="submit" id="submit">SET</button>
+        <div class="presets">
+            <button type="button" data-v="0">0</button>
+            <button type="button" data-v="25">25</button>
+            <button type="button" data-v="50">50</button>
+            <button type="button" data-v="75">75</button>
+            <button type="button" data-v="100">100</button>
+        </div>
+    </form>
+    <div class="status" id="status"></div>
+
+    <script>
+        const BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019ddde2-733b-7d83-a878-07526e01a88b';
+        const currentEl = document.getElementById('current');
+        const valueEl = document.getElementById('value');
+        const submitEl = document.getElementById('submit');
+        const statusEl = document.getElementById('status');
+        const form = document.getElementById('form');
+
+        function setStatus(msg, kind) {
+            statusEl.textContent = msg;
+            statusEl.className = 'status ' + (kind || '');
+        }
+
+        async function loadCurrent() {
+            try {
+                const r = await fetch(BLOB_URL + '?_=' + Date.now(), {
+                    cache: 'no-store',
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                const data = await r.json();
+                const v = parseFloat(data.progress);
+                if (!isNaN(v)) {
+                    currentEl.textContent = v;
+                    valueEl.value = v;
+                }
+            } catch (e) {
+                setStatus('Could not read current value', 'err');
+            }
+        }
+
+        async function setValue(v) {
+            v = Math.max(0, Math.min(100, parseFloat(v)));
+            if (isNaN(v)) {
+                setStatus('Enter a number 0-100', 'err');
+                return;
+            }
+            submitEl.disabled = true;
+            setStatus('Sending...', '');
+            try {
+                const r = await fetch(BLOB_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ progress: v })
+                });
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                currentEl.textContent = v;
+                valueEl.value = v;
+                setStatus('Updated to ' + v + '%', 'ok');
+            } catch (e) {
+                setStatus('Update failed: ' + e.message, 'err');
+            } finally {
+                submitEl.disabled = false;
+            }
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            setValue(valueEl.value);
+        });
+
+        document.querySelectorAll('.presets button').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                setValue(btn.dataset.v);
+            });
+        });
+
+        loadCurrent();
+        setInterval(loadCurrent, 15000);
+    </script>
+</body>
+</html>
