@@ -171,16 +171,12 @@
         }
         wobble();
 
-        const BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019ddde2-733b-7d83-a878-07526e01a88b';
+        const KVDB_URL = 'https://kvdb.io/FbDzaTikbRwrN5i2ruzK9J/progress';
         async function fetchProgress() {
             try {
-                const r = await fetch(BLOB_URL + '?_=' + Date.now(), {
-                    cache: 'no-store',
-                    headers: { 'Accept': 'application/json' }
-                });
+                const r = await fetch(KVDB_URL + '?_=' + Date.now(), { cache: 'no-store' });
                 if (r.ok) {
-                    const data = await r.json();
-                    const v = parseFloat(data.progress);
+                    const v = parseFloat((await r.text()).trim());
                     if (!isNaN(v)) center = Math.max(0, Math.min(100, v));
                 }
             } catch (e) {}

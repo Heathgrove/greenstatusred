@@ -21,45 +21,121 @@
             min-height: 100vh;
             box-sizing: border-box;
         }
-        h1 {
-            font-size: 36px;
-            margin: 0 0 32px 0;
+        .current {
+            font-size: 64px;
             letter-spacing: 4px;
-            text-shadow: 0 0 8px #cc0000;
-        }
-        a.edit-link {
-            display: inline-block;
-            font-size: 26px;
-            letter-spacing: 3px;
             color: #ff4040;
-            background: black;
-            border: 2px solid #e62828;
-            box-shadow: 0 0 10px #8a1010;
-            padding: 16px 28px;
-            text-decoration: none;
-            text-shadow: 0 0 6px #cc0000;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #cc0000;
+            margin: 0 0 32px 0;
+            line-height: 1;
         }
-        a.edit-link:hover, a.edit-link:focus {
+        .current .unit {
+            font-size: 32px;
+            opacity: 0.7;
+            margin-left: 4px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin: 0 auto;
+        }
+        input[type=number] {
+            font-family: inherit;
+            font-size: 40px;
+            text-align: center;
+            background: black;
+            color: #5dd95d;
+            border: 2px solid #5dd95d;
+            box-shadow: 0 0 8px #2a8a2a;
+            padding: 8px 12px;
+            width: 200px;
+            letter-spacing: 4px;
+            outline: none;
+        }
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] { -moz-appearance: textfield; }
+        button {
+            font-family: inherit;
+            font-size: 22px;
+            letter-spacing: 3px;
+            background: black;
+            color: #ff4040;
+            border: 2px solid #e62828;
+            box-shadow: 0 0 8px #8a1010;
+            padding: 10px 22px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        button:hover, button:focus {
             background: #200000;
             outline: none;
         }
-        .hint {
-            margin-top: 28px;
-            font-size: 16px;
-            letter-spacing: 1px;
-            color: #aa3030;
-            line-height: 1.5;
-            max-width: 480px;
-            margin-left: auto;
-            margin-right: auto;
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     </style>
 </head>
 <body>
-    <h1>STATUS CONTROL</h1>
-    <a class="edit-link" href="https://jsonblob.com/019ddde2-733b-7d83-a878-07526e01a88b" target="_blank" rel="noopener">EDIT PROGRESS</a>
-    <div class="hint">
-        Set the value of <code>"progress"</code> to a number between 0 and 100, then click "Update".
-    </div>
+    <div class="current"><span id="current">--</span><span class="unit">%</span></div>
+    <form id="form">
+        <input type="number" id="value" min="0" max="100" step="0.1" required>
+        <button type="submit" id="submit">SET</button>
+    </form>
+
+    <script>
+        const KVDB_URL = 'https://kvdb.io/FbDzaTikbRwrN5i2ruzK9J/progress';
+        const currentEl = document.getElementById('current');
+        const valueEl = document.getElementById('value');
+        const submitEl = document.getElementById('submit');
+        const form = document.getElementById('form');
+
+        async function loadCurrent() {
+            try {
+                const r = await fetch(KVDB_URL + '?_=' + Date.now(), { cache: 'no-store' });
+                if (r.ok) {
+                    const v = parseFloat((await r.text()).trim());
+                    if (!isNaN(v)) {
+                        currentEl.textContent = v;
+                        valueEl.value = v;
+                    }
+                }
+            } catch (e) {}
+        }
+
+        async function setValue(v) {
+            v = Math.max(0, Math.min(100, parseFloat(v)));
+            if (isNaN(v)) return;
+            submitEl.disabled = true;
+            try {
+                const r = await fetch(KVDB_URL, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: String(v)
+                });
+                if (r.ok) {
+                    currentEl.textContent = v;
+                    valueEl.value = v;
+                }
+            } catch (e) {
+            } finally {
+                submitEl.disabled = false;
+            }
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            setValue(valueEl.value);
+        });
+
+        loadCurrent();
+        setInterval(loadCurrent, 15000);
+    </script>
 </body>
 </html>
