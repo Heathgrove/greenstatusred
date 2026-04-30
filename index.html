@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Status Page</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,24 +47,29 @@
             color: #ff4040;
             margin: 0 0 65px 0;
             text-shadow: 0 0 6px #cc0000;
+            line-height: 1.1;
+        }
+        #subtitle-1, #subtitle-2 {
+            display: inline-block;
+        }
+        #subtitle-2 {
+            transform-origin: center;
         }
         .row {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
-            width: 80%;
+            gap: 0;
+            width: 96%;
             margin: 0 auto;
-        }
-        .row img {
-            height: 200px;
-            width: auto;
-        }
-        .bar-column {
-            flex: 1;
             position: relative;
         }
+        .row img {
+            height: 100px;
+            width: auto;
+        }
         .progress {
+            flex: 1;
             height: 100px;
             background-color: #e62828;
             box-shadow: 0 0 10px #e62828, 0 0 20px #8a1010;
@@ -74,14 +82,14 @@
         }
         .countdown {
             position: absolute;
-            bottom: 100%;
             left: 0;
             right: 0;
-            margin-bottom: 10px;
-            font-size: 72px;
-            letter-spacing: 6px;
+            bottom: calc(100% + 10px);
+            font-size: clamp(20px, 7vw, 72px);
+            letter-spacing: clamp(1.5px, 0.6vw, 6px);
             color: #ff4040;
             text-shadow: 0 0 10px #ff0000, 0 0 20px #cc0000;
+            white-space: nowrap;
         }
         .countdown .label {
             display: block;
@@ -91,24 +99,69 @@
             color: #ff6060;
             text-shadow: 0 0 6px #cc0000;
         }
+        @media (max-width: 768px) {
+            body { padding-top: 12px; }
+            h1 {
+                font-size: 64px;
+                margin: 0 0 10px 0;
+            }
+            .subtitle {
+                font-size: 18px;
+                letter-spacing: 1.5px;
+                margin: 0 0 32px 0;
+                padding: 0 8px;
+            }
+            .row {
+                width: 99%;
+                gap: 0;
+            }
+            .row img {
+                height: 40px;
+            }
+            .progress {
+                height: 40px;
+            }
+            .countdown {
+                bottom: calc(100% + 6px);
+            }
+        }
+        @media (max-width: 420px) {
+            h1 { font-size: 52px; }
+            .subtitle { font-size: 14px; letter-spacing: 1px; margin-bottom: 26px; }
+            .row img { height: 32px; }
+            .progress { height: 32px; }
+        }
     </style>
 </head>
 <body>
     <h1>ALERT</h1>
-    <div class="subtitle">CRISIS POINT REACHED - STATUS ALERT SYSTEM ACTIVE</div>
+    <div class="subtitle">
+        <div><span id="subtitle-1">CRISIS POINT REACHED</span></div>
+        <div><span id="subtitle-2">STATUS ALERT SYSTEM ACTIVE</span></div>
+    </div>
     <div class="row">
+        <div class="countdown">
+            <span id="countdown-value">--</span>
+        </div>
         <img src="Varjan.jpg" alt="Varjan">
-        <div class="bar-column">
-            <div class="countdown">
-                <span id="countdown-value">--</span>
-            </div>
-            <div class="progress">
-                <div class="progress-fill"></div>
-            </div>
+        <div class="progress">
+            <div class="progress-fill"></div>
         </div>
         <img src="Kronos.jpg" alt="Kronos">
     </div>
     <script>
+        try {
+            const nav = performance.getEntriesByType('navigation')[0];
+            if (nav && nav.transferSize === 0) {
+                const url = new URL(location.href);
+                url.searchParams.set('_cb', Date.now());
+                location.replace(url.toString());
+            }
+        } catch (e) {}
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) location.reload();
+        });
+
         const fill = document.querySelector('.progress-fill');
         const center = 50;
         const swing = 1;
@@ -136,6 +189,20 @@
             requestAnimationFrame(tick);
         }
         tick();
+
+        const sub1 = document.getElementById('subtitle-1');
+        const sub2 = document.getElementById('subtitle-2');
+        function fitSubtitle() {
+            sub2.style.transform = 'none';
+            const w1 = sub1.getBoundingClientRect().width;
+            const w2 = sub2.getBoundingClientRect().width;
+            if (w2 > 0) sub2.style.transform = `scaleX(${w1 / w2})`;
+        }
+        fitSubtitle();
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(fitSubtitle);
+        }
+        window.addEventListener('resize', fitSubtitle);
     </script>
 </body>
 </html>
