@@ -201,7 +201,7 @@
             const minutes = Math.floor((diff % 3600000) / 60000);
             const seconds = Math.floor((diff % 60000) / 1000);
             const cs = Math.floor((diff % 1000) / 10);
-            cdEl.textContent = `${days}:${pad(hours,2)}:${pad(minutes,2)}:${pad(seconds,2)}.${pad(cs,2)}`;
+            cdEl.textContent = `${days}:${pad(hours,2)}:${pad(minutes,2)}:${pad(seconds,2)}:${pad(cs,2)}`;
             requestAnimationFrame(tick);
         }
         tick();
