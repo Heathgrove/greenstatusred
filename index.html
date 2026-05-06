@@ -102,6 +102,40 @@
             color: #ff6060;
             text-shadow: 0 0 6px #cc0000;
         }
+        .sitrep-header {
+            position: relative;
+            margin: 26px auto 18px auto;
+            font-size: 44px;
+            letter-spacing: 3px;
+            color: #ff4040;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #cc0000;
+            line-height: 1.1;
+            padding-bottom: 14px;
+            width: 88%;
+            display: none;
+        }
+        .sitrep-header::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 2px;
+            background: #ff2020;
+            box-shadow: 0 0 8px #ff0000, 0 0 16px #cc0000, 0 0 28px #800000;
+        }
+        .message {
+            margin: 0 auto;
+            padding: 0 16px;
+            font-size: clamp(20px, 7vw, 72px);
+            letter-spacing: clamp(1.5px, 0.6vw, 6px);
+            color: #ff4040;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #cc0000;
+            line-height: 1.2;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-width: 96%;
+        }
         @media (max-width: 768px) {
             body { padding-top: 12px; }
             h1 {
@@ -127,12 +161,19 @@
             .countdown {
                 margin-bottom: 6px;
             }
+            .sitrep-header {
+                font-size: 18px;
+                letter-spacing: 1.5px;
+                margin: 14px 0 6px 0;
+                padding: 0 8px;
+            }
         }
         @media (max-width: 420px) {
             h1 { font-size: 52px; }
             .subtitle { font-size: 14px; letter-spacing: 1px; margin-bottom: 6px; }
             .row img { height: 40px; }
             .progress { height: 32px; }
+            .sitrep-header { font-size: 14px; letter-spacing: 1px; }
         }
     </style>
 </head>
@@ -152,6 +193,8 @@
         </div>
         <img src="Kronos.png" alt="Kronos">
     </div>
+    <div class="sitrep-header" id="sitrep-header">SITREP EVENT</div>
+    <div class="message" id="message"></div>
     <script>
         try {
             const nav = performance.getEntriesByType('navigation')[0];
@@ -178,6 +221,8 @@
         wobble();
 
         const KVDB_URL = 'https://kvdb.io/FbDzaTikbRwrN5i2ruzK9J/progress';
+        const KVDB_MESSAGE_URL = 'https://kvdb.io/FbDzaTikbRwrN5i2ruzK9J/message';
+        const messageEl = document.getElementById('message');
         async function fetchProgress() {
             try {
                 const r = await fetch(KVDB_URL + '?_=' + Date.now(), { cache: 'no-store' });
@@ -187,8 +232,27 @@
                 }
             } catch (e) {}
         }
+        const sitrepHeaderEl = document.getElementById('sitrep-header');
+        function applyMessage(text) {
+            messageEl.textContent = text;
+            const hasContent = text && text.trim().length > 0;
+            sitrepHeaderEl.style.display = hasContent ? 'block' : 'none';
+            if (hasContent) fitSubtitle();
+        }
+        async function fetchMessage() {
+            try {
+                const r = await fetch(KVDB_MESSAGE_URL + '?_=' + Date.now(), { cache: 'no-store' });
+                if (r.ok) {
+                    applyMessage(await r.text());
+                } else if (r.status === 404) {
+                    applyMessage('');
+                }
+            } catch (e) {}
+        }
         fetchProgress();
+        fetchMessage();
         setInterval(fetchProgress, 15000);
+        setInterval(fetchMessage, 15000);
 
         const target = new Date('2026-05-30T14:00:00+01:00').getTime();
         const cdEl = document.getElementById('countdown-value');
@@ -208,6 +272,7 @@
 
         const sub1 = document.getElementById('subtitle-1');
         const sub2 = document.getElementById('subtitle-2');
+        const sitrepHeader = document.getElementById('sitrep-header');
         function fitSubtitle() {
             sub1.style.fontSize = '';
             sub1.style.letterSpacing = '';
@@ -225,15 +290,21 @@
 
             const target = window.innerWidth * 0.88;
             const naturalWidth = sub1.getBoundingClientRect().width;
+            let scaledSize = baseSize;
             if (naturalWidth > 0 && target > 0) {
-                const newSize = baseSize * (target / naturalWidth);
-                sub1.style.fontSize = newSize + 'px';
-                sub2.style.fontSize = newSize + 'px';
+                scaledSize = baseSize * (target / naturalWidth);
+                sub1.style.fontSize = scaledSize + 'px';
+                sub2.style.fontSize = scaledSize + 'px';
             }
 
             const w1 = sub1.getBoundingClientRect().width;
             const w2 = sub2.getBoundingClientRect().width;
             if (w2 > 0) sub2.style.transform = `scaleX(${w1 / w2})`;
+
+            if (sitrepHeader) {
+                sitrepHeader.style.fontSize = scaledSize + 'px';
+                sitrepHeader.style.letterSpacing = lsEm + 'em';
+            }
         }
         fitSubtitle();
         if (document.fonts && document.fonts.ready) {

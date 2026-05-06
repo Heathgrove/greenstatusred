@@ -60,6 +60,37 @@
             margin: 0;
         }
         input[type=number] { -moz-appearance: textfield; }
+        textarea {
+            font-family: inherit;
+            font-size: 22px;
+            text-align: center;
+            background: black;
+            color: #5dd95d;
+            border: 2px solid #5dd95d;
+            box-shadow: 0 0 8px #2a8a2a;
+            padding: 10px 12px;
+            width: 320px;
+            max-width: 90vw;
+            line-height: 1.3;
+            min-height: calc(22px * 1.3 * 10);
+            letter-spacing: 2px;
+            outline: none;
+            resize: vertical;
+        }
+        .section-divider {
+            width: 60%;
+            max-width: 320px;
+            margin: 40px auto 24px auto;
+            border: 0;
+            border-top: 1px dashed #5a1010;
+        }
+        .section-label {
+            font-size: 22px;
+            letter-spacing: 4px;
+            color: #ff6060;
+            text-shadow: 0 0 6px #cc0000;
+            margin: 0 0 16px 0;
+        }
         button {
             font-family: inherit;
             font-size: 22px;
@@ -89,6 +120,13 @@
         <button type="submit" id="submit">SET</button>
     </form>
 
+    <hr class="section-divider">
+    <div class="section-label">MESSAGE</div>
+    <form id="message-form">
+        <textarea id="message-value" placeholder="Enter message..."></textarea>
+        <button type="submit" id="message-submit">SET MESSAGE</button>
+    </form>
+
     <script>
         try {
             const nav = performance.getEntriesByType('navigation')[0];
@@ -103,10 +141,14 @@
         });
 
         const KVDB_URL = 'https://kvdb.io/FbDzaTikbRwrN5i2ruzK9J/progress';
+        const KVDB_MESSAGE_URL = 'https://kvdb.io/FbDzaTikbRwrN5i2ruzK9J/message';
         const currentEl = document.getElementById('current');
         const valueEl = document.getElementById('value');
         const submitEl = document.getElementById('submit');
         const form = document.getElementById('form');
+        const messageValueEl = document.getElementById('message-value');
+        const messageSubmitEl = document.getElementById('message-submit');
+        const messageForm = document.getElementById('message-form');
 
         async function loadCurrent() {
             try {
@@ -146,8 +188,43 @@
             setValue(valueEl.value);
         });
 
+        async function loadMessage() {
+            try {
+                const r = await fetch(KVDB_MESSAGE_URL + '?_=' + Date.now(), { cache: 'no-store' });
+                if (r.ok) {
+                    messageValueEl.value = await r.text();
+                } else if (r.status === 404) {
+                    messageValueEl.value = '';
+                }
+            } catch (e) {}
+        }
+
+        async function setMessage(text) {
+            messageSubmitEl.disabled = true;
+            try {
+                const r = await fetch(KVDB_MESSAGE_URL, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: text
+                });
+                if (r.ok) {
+                    messageValueEl.value = text;
+                }
+            } catch (e) {
+            } finally {
+                messageSubmitEl.disabled = false;
+            }
+        }
+
+        messageForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            setMessage(messageValueEl.value);
+        });
+
         loadCurrent();
+        loadMessage();
         setInterval(loadCurrent, 15000);
+        setInterval(loadMessage, 15000);
     </script>
 </body>
 </html>
